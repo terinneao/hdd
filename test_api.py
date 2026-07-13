@@ -1,0 +1,29 @@
+"""Quick end-to-end test of the /api/calculate endpoint."""
+import json
+import urllib.request
+
+payload = {
+    "dn_mm": 315, "sdr": 11,
+    "L1": 30, "L2": 60, "L3": 150, "L4": 60, "depth": 8,
+    "entry_angle": 12, "exit_angle": 10,
+    "mu_ground": 0.1, "mu_bore": 0.3,
+    "mud_density": 1150, "soil_density": 1900, "gw_height": 4,
+    "e_soil_mpa": 0.5, "hydrokinetic_kpa": 70, "hole_mult": 1.5,
+    "bend_radius": 50, "ballast_fill": 0,
+    "e_pullback": 350, "e_longterm": 200, "poisson": 0.45,
+    "safe_pull_mpa": 8, "comp_allow_mpa": 7.9, "sf_collapse": 2,
+    "install_ovality_pct": 3, "op_pressure_bar": 6, "vacuum_kpa": 0,
+}
+
+req = urllib.request.Request(
+    "http://127.0.0.1:8000/api/calculate",
+    data=json.dumps(payload).encode(),
+    headers={"Content-Type": "application/json"},
+)
+d = json.load(urllib.request.urlopen(req))
+print("overall_ok:", d["overall_ok"])
+print("T_max: %.0f kgf | F_safe: %.0f kgf" %
+      (d["pullback"]["T_max_kgf"], d["pullback"]["F_safe_kgf"]))
+print("collapse SF (install): %.2f | deflection: %.2f%% | buckling SF: %.2f" %
+      (d["collapse_install"]["sf"], d["service"]["deflection_pct"],
+       d["service"]["sf_buckling"]))

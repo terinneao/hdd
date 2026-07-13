@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HDD Calculator — HDPE PE100 (TIS 982)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>HDD Pipe Calculator</h1>
+  <p>HDPE PE100 pipe design for Horizontal Directional Drilling — per PPI Handbook of Polyethylene Pipe (Ch.&nbsp;12) &amp; ASTM F1962 · Pipe data: TIS 982 · Units: kg / m</p>
+</header>
+
+<main>
+  <div class="inputs">
+
+    <section class="card">
+      <h2>1 · Pipe Selection (TIS 982, PE100)</h2>
+      <div class="grid">
+        <label>Nominal diameter DN (mm)
+          <select id="dn"></select>
+        </label>
+        <label>SDR
+          <select id="sdr"></select>
+        </label>
+      </div>
+      <div id="pipe-info" class="pipe-info"></div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Bore Path (ASTM F1962)</h2>
+      <div class="grid">
+        <label>L₁ — pipe on surface behind entry (m)
+          <input type="number" id="L1" value="30" step="any"></label>
+        <label>L₂ — entry slope to design depth (m)
+          <input type="number" id="L2" value="60" step="any"></label>
+        <label>L₃ — horizontal run at depth (m)
+          <input type="number" id="L3" value="150" step="any"></label>
+        <label>L₄ — exit slope to surface (m)
+          <input type="number" id="L4" value="60" step="any"></label>
+        <label>Max depth of bore H (m)
+          <input type="number" id="depth" value="8" step="any"></label>
+        <label>Entry angle α (°)
+          <input type="number" id="entry_angle" value="12" step="any"></label>
+        <label>Exit angle β (°)
+          <input type="number" id="exit_angle" value="10" step="any"></label>
+        <label>Min bend radius R (m, 0 = ignore)
+          <input type="number" id="bend_radius" value="50" step="any"></label>
+        <label>Reamed hole ÷ pipe OD
+          <input type="number" id="hole_mult" value="1.5" step="any"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3 · Soil, Fluid &amp; Friction</h2>
+      <div class="grid">
+        <label>Drilling mud density (kg/m³)
+          <input type="number" id="mud_density" value="1150" step="any"></label>
+        <label>Soil density (kg/m³)
+          <input type="number" id="soil_density" value="1900" step="any"></label>
+        <label>Groundwater above pipe (m)
+          <input type="number" id="gw_height" value="4" step="any"></label>
+        <label>Soil reaction modulus E′ (MPa)
+          <input type="number" id="e_soil_mpa" value="0.5" step="any"></label>
+        <label>Hydrokinetic pressure (kPa)
+          <input type="number" id="hydrokinetic_kpa" value="70" step="any"></label>
+        <label>Friction — pipe on surface μₐ
+          <input type="number" id="mu_ground" value="0.1" step="any"></label>
+        <label>Friction — pipe in bore μᵦ
+          <input type="number" id="mu_bore" value="0.3" step="any"></label>
+        <label>Pipe during pullback
+          <select id="ballast_fill">
+            <option value="0">Empty (air)</option>
+            <option value="1">Water-ballasted (full)</option>
+          </select></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4 · Material &amp; Design Factors (PE100)</h2>
+      <div class="grid">
+        <label>Apparent modulus, pullback ≈12 h (MPa)
+          <input type="number" id="e_pullback" value="350" step="any"></label>
+        <label>Apparent modulus, 50-year (MPa)
+          <input type="number" id="e_longterm" value="200" step="any"></label>
+        <label>Poisson ratio ν
+          <input type="number" id="poisson" value="0.45" step="any"></label>
+        <label>Safe pull stress (MPa)
+          <input type="number" id="safe_pull_mpa" value="8.0" step="any"></label>
+        <label>Allowable compressive stress (MPa)
+          <input type="number" id="comp_allow_mpa" value="7.9" step="any"></label>
+        <label>SF required vs collapse
+          <input type="number" id="sf_collapse" value="2.0" step="any"></label>
+        <label>Assumed ovality during pull (%)
+          <input type="number" id="install_ovality_pct" value="3" step="any"></label>
+        <label>Working pressure (bar)
+          <input type="number" id="op_pressure_bar" value="6" step="any"></label>
+        <label>Vacuum / transient (kPa)
+          <input type="number" id="vacuum_kpa" value="0" step="any"></label>
+      </div>
+    </section>
+
+    <button id="calc-btn">Calculate</button>
+  </div>
+
+  <div class="results" id="results">
+    <div class="placeholder">Select a pipe, enter the bore geometry and press <b>Calculate</b>.</div>
+  </div>
+</main>
+
+<footer>
+  Method: PPI Handbook of Polyethylene Pipe, 2nd ed., Chapter 12 (HDD) · ASTM F1962 pull-force model ·
+  Levy unconstrained buckling with ovality (f₀) and tension (f_R) factors.
+  Results are estimates — final design must be verified by a qualified engineer.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
