@@ -30,7 +30,7 @@ def index():
 def pipes():
     con = get_db()
     rows = con.execute(
-        "SELECT * FROM pipes ORDER BY dn_mm, sdr DESC").fetchall()
+        "SELECT * FROM pipes ORDER BY grade, dn_mm, sdr DESC").fetchall()
     con.close()
     return jsonify([dict(r) for r in rows])
 
@@ -40,8 +40,8 @@ def calc():
     data = request.get_json(force=True)
     con = get_db()
     pipe = con.execute(
-        "SELECT * FROM pipes WHERE dn_mm = ? AND sdr = ?",
-        (data["dn_mm"], data["sdr"])).fetchone()
+        "SELECT * FROM pipes WHERE grade = ? AND dn_mm = ? AND sdr = ?",
+        (data.get("grade", "PE100"), data["dn_mm"], data["sdr"])).fetchone()
     con.close()
     if pipe is None:
         return jsonify({"error": "Pipe not found in database"}), 404

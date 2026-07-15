@@ -1,14 +1,16 @@
 """
-Generate the HDPE PE100 pipe database (TIS 982 / ISO 4427 dimensions).
+Generate the HDPE pipe database (TIS 982 / ISO 4427 dimensions),
+grades PE100 and PE80.
 
 Produces:
   - pipe_data.sql : plain SQL (CREATE TABLE + INSERTs)
   - pipes.db      : SQLite database used by the web app
 
-Wall thicknesses are minimum wall (e_min, mm) per TIS 982-2556 / ISO 4427-2
-for PE100. Weight per metre is computed from mean wall dimensions with
-PE density 955 kg/m3 and a 5% allowance for dimensional tolerances,
-which reproduces typical manufacturer catalogue values.
+Wall thicknesses are minimum wall (e_min, mm) per TIS 982-2556 / ISO 4427-2.
+Dimensions depend only on SDR, so PE100 and PE80 share the same wall table;
+the pressure rating (PN) differs by grade. Weight per metre is computed from
+mean wall dimensions with PE density 955 kg/m3 and a 5% allowance for
+dimensional tolerances, which reproduces typical manufacturer catalogue values.
 """
 
 import math
@@ -18,10 +20,15 @@ import os
 PE_DENSITY = 955.0   # kg/m3
 TOL_FACTOR = 1.05    # allowance for mean wall vs minimum wall
 
-# PN (bar) for PE100 (MRS 10 MPa, design coefficient C = 1.25)
-PN_BY_SDR = {9: 20, 11: 16, 13.6: 12.5, 17: 10, 21: 8, 26: 6.3, 33: 5, 41: 4}
+# PN (bar) per grade (design coefficient C = 1.25):
+#   PE100: MRS 10 MPa, sigma_s = 8.0 MPa
+#   PE80:  MRS  8 MPa, sigma_s = 6.3 MPa
+PN_BY_GRADE_SDR = {
+    "PE100": {9: 20, 11: 16, 13.6: 12.5, 17: 10, 21: 8, 26: 6.3, 33: 5, 41: 4},
+    "PE80":  {9: 16, 11: 12.5, 13.6: 10, 17: 8, 21: 6.3, 26: 5, 33: 4, 41: 3.2},
+}
 
-# DN (mm) -> {SDR: e_min (mm)}  per TIS 982 / ISO 4427-2, PE100
+# DN (mm) -> {SDR: e_min (mm)}  per TIS 982 / ISO 4427-2
 WALLS = {
     63:   {9: 7.1,  11: 5.8,  13.6: 4.7,  17: 3.8,  21: 3.0,  26: 2.5},
     75:   {9: 8.4,  11: 6.8,  13.6: 5.6,  17: 4.5,  21: 3.6,  26: 2.9},
@@ -52,23 +59,28 @@ WALLS = {
 def build_rows():
     rows = []
     pid = 1
-    for dn in sorted(WALLS):
-        for sdr in sorted(WALLS[dn], reverse=True):
-            e = WALLS[dn][sdr]
-            inner = dn - 2 * e
-            # weight per metre from mean dimensions (kg/m)
-            w = math.pi * (e / 1000.0) * ((dn - e) / 1000.0) * PE_DENSITY * TOL_FACTOR
-            rows.append((pid, dn, sdr, PN_BY_SDR[sdr], e, round(inner, 1), round(w, 2)))
-            pid += 1
+    for grade in ("PE100", "PE80"):
+        pn_by_sdr = PN_BY_GRADE_SDR[grade]
+        for dn in sorted(WALLS):
+            for sdr in sorted(WALLS[dn], reverse=True):
+                e = WALLS[dn][sdr]
+                inner = dn - 2 * e
+                # weight per metre from mean dimensions (kg/m)
+                w = math.pi * (e / 1000.0) * ((dn - e) / 1000.0) \
+                    * PE_DENSITY * TOL_FACTOR
+                rows.append((pid, grade, dn, sdr, pn_by_sdr[sdr], e,
+                             round(inner, 1), round(w, 2)))
+                pid += 1
     return rows
 
 
 SCHEMA = """DROP TABLE IF EXISTS pipes;
 CREATE TABLE pipes (
     id INTEGER PRIMARY KEY,
+    grade TEXT NOT NULL,          -- material grade: PE100 or PE80
     dn_mm REAL NOT NULL,          -- nominal outside diameter (mm)
     sdr REAL NOT NULL,            -- standard dimension ratio
-    pn_bar REAL NOT NULL,         -- pressure rating for PE100 (bar)
+    pn_bar REAL NOT NULL,         -- pressure rating for the grade (bar)
     wall_mm REAL NOT NULL,        -- minimum wall thickness (mm)
     id_mm REAL NOT NULL,          -- mean inside diameter (mm)
     weight_kg_m REAL NOT NULL     -- weight per metre (kg/m)
@@ -82,14 +94,15 @@ def main():
 
     sql_path = os.path.join(here, "pipe_data.sql")
     with open(sql_path, "w", encoding="utf-8") as f:
-        f.write("-- HDPE PE100 pipe database per TIS 982-2556 / ISO 4427\n")
-        f.write("-- Columns: dn_mm, sdr, pn_bar, wall_mm, id_mm, weight_kg_m\n")
+        f.write("-- HDPE pipe database (PE100 and PE80) per TIS 982-2556 / ISO 4427\n")
+        f.write("-- Columns: grade, dn_mm, sdr, pn_bar, wall_mm, id_mm, weight_kg_m\n")
         f.write(SCHEMA)
         f.write("\n")
         for r in rows:
             f.write(
                 "INSERT INTO pipes VALUES "
-                f"({r[0]}, {r[1]}, {r[2]}, {r[3]}, {r[4]}, {r[5]}, {r[6]});\n"
+                f"({r[0]}, '{r[1]}', {r[2]}, {r[3]}, {r[4]}, {r[5]}, "
+                f"{r[6]}, {r[7]});\n"
             )
 
     db_path = os.path.join(here, "pipes.db")

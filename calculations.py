@@ -161,6 +161,7 @@ def calculate(pipe, p):
 
     return {
         "pipe": {
+            "grade": pipe.get("grade", "PE100"),
             "dn_mm": pipe["dn_mm"], "sdr": pipe["sdr"], "pn_bar": pipe["pn_bar"],
             "wall_mm": pipe["wall_mm"], "id_mm": pipe["id_mm"],
             "weight_kg_m": wp, "area_mm2": A * 1e6, "dr_actual": round(DR, 2),

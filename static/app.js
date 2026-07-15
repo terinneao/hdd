@@ -4,18 +4,44 @@ const $ = (id) => document.getElementById(id);
 const fmt = (v, d = 1) =>
   Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
 
+// Typical material defaults per grade (editable by the user):
+// apparent modulus for the ~12 h pull, 50-year modulus, safe pull
+// stress and allowable long-term compressive stress (MPa).
+const GRADE_DEFAULTS = {
+  PE100: { e_pullback: 350, e_longterm: 200, safe_pull_mpa: 8.0, comp_allow_mpa: 7.9 },
+  PE80:  { e_pullback: 300, e_longterm: 150, safe_pull_mpa: 6.5, comp_allow_mpa: 6.3 },
+};
+
 async function loadPipes() {
   PIPES = await (await fetch("/api/pipes")).json();
-  const dns = [...new Set(PIPES.map((p) => p.dn_mm))];
-  $("dn").innerHTML = dns.map((d) => `<option value="${d}">${d}</option>`).join("");
+  applyGradeDefaults();
+  refreshDn();
   $("dn").value = 315;
   refreshSdr();
+}
+
+function gradePipes() {
+  return PIPES.filter((p) => p.grade === $("grade").value);
+}
+
+function applyGradeDefaults() {
+  const d = GRADE_DEFAULTS[$("grade").value];
+  for (const k in d) $(k).value = d[k];
+  $("grade-tag").textContent = `(${$("grade").value})`;
+}
+
+function refreshDn() {
+  const prev = $("dn").value;
+  const dns = [...new Set(gradePipes().map((p) => p.dn_mm))];
+  $("dn").innerHTML = dns.map((d) => `<option value="${d}">${d}</option>`).join("");
+  if (dns.includes(+prev)) $("dn").value = prev;
 }
 
 function refreshSdr() {
   const dn = +$("dn").value;
   const prev = $("sdr").value;
-  const sdrs = PIPES.filter((p) => p.dn_mm === dn).map((p) => p.sdr).sort((a, b) => a - b);
+  const sdrs = gradePipes().filter((p) => p.dn_mm === dn)
+    .map((p) => p.sdr).sort((a, b) => a - b);
   $("sdr").innerHTML = sdrs.map((s) => `<option value="${s}">SDR ${s}</option>`).join("");
   if (sdrs.includes(+prev)) $("sdr").value = prev;
   else if (sdrs.includes(11)) $("sdr").value = 11;
@@ -23,20 +49,21 @@ function refreshSdr() {
 }
 
 function currentPipe() {
-  return PIPES.find((p) => p.dn_mm === +$("dn").value && p.sdr === +$("sdr").value);
+  return gradePipes().find((p) => p.dn_mm === +$("dn").value && p.sdr === +$("sdr").value);
 }
 
 function showPipeInfo() {
   const p = currentPipe();
   if (!p) return;
   $("pipe-info").innerHTML =
-    `PE100 &nbsp;DN <b>${p.dn_mm} mm</b> · SDR <b>${p.sdr}</b> · PN <b>${p.pn_bar} bar</b><br>` +
+    `<b>${p.grade}</b> &nbsp;DN <b>${p.dn_mm} mm</b> · SDR <b>${p.sdr}</b> · PN <b>${p.pn_bar} bar</b><br>` +
     `Wall <b>${p.wall_mm} mm</b> · ID <b>${p.id_mm} mm</b> · Weight <b>${fmt(p.weight_kg_m, 2)} kg/m</b>`;
 }
 
 function inputs() {
   const num = (id) => parseFloat($(id).value) || 0;
   return {
+    grade: $("grade").value,
     dn_mm: +$("dn").value,
     sdr: +$("sdr").value,
     L1: num("L1"), L2: num("L2"), L3: num("L3"), L4: num("L4"),
@@ -80,7 +107,7 @@ function render(r) {
   <section class="card rescard">
     <h2>Pipe &amp; Buoyancy</h2>
     <table>
-      ${row("Pipe", `DN ${r.pipe.dn_mm} mm · SDR ${r.pipe.sdr} · PN ${r.pipe.pn_bar} bar`)}
+      ${row("Pipe", `${r.pipe.grade} · DN ${r.pipe.dn_mm} mm · SDR ${r.pipe.sdr} · PN ${r.pipe.pn_bar} bar`)}
       ${row("Wall / ID", `${r.pipe.wall_mm} mm / ${r.pipe.id_mm} mm`)}
       ${row("Wall area", `${fmt(r.pipe.area_mm2, 0)} mm²`)}
       ${row("Pipe weight", `${fmt(b.pipe_weight_kg_m, 2)} kg/m`)}
@@ -149,6 +176,11 @@ async function calculate() {
   render(data);
 }
 
+$("grade").addEventListener("change", () => {
+  applyGradeDefaults();
+  refreshDn();
+  refreshSdr();
+});
 $("dn").addEventListener("change", refreshSdr);
 $("sdr").addEventListener("change", showPipeInfo);
 $("calc-btn").addEventListener("click", calculate);

@@ -9,15 +9,21 @@
 <body>
 <header>
   <h1>HDD Pipe Calculator</h1>
-  <p>HDPE PE100 pipe design for Horizontal Directional Drilling — per PPI Handbook of Polyethylene Pipe (Ch.&nbsp;12) &amp; ASTM F1962 · Pipe data: TIS 982 · Units: kg / m</p>
+  <p>HDPE pipe (PE100 / PE80) design for Horizontal Directional Drilling — per PPI Handbook of Polyethylene Pipe (Ch.&nbsp;12) &amp; ASTM F1962 · Pipe data: TIS 982 · Units: kg / m</p>
 </header>
 
 <main>
   <div class="inputs">
 
     <section class="card">
-      <h2>1 · Pipe Selection (TIS 982, PE100)</h2>
+      <h2>1 · Pipe Selection (TIS 982)</h2>
       <div class="grid">
+        <label>Material grade
+          <select id="grade">
+            <option value="PE100">PE100</option>
+            <option value="PE80">PE80</option>
+          </select>
+        </label>
         <label>Nominal diameter DN (mm)
           <select id="dn"></select>
         </label>
@@ -78,7 +84,7 @@
     </section>
 
     <section class="card">
-      <h2>4 · Material &amp; Design Factors (PE100)</h2>
+      <h2>4 · Material &amp; Design Factors <span id="grade-tag"></span></h2>
       <div class="grid">
         <label>Apparent modulus, pullback ≈12 h (MPa)
           <input type="number" id="e_pullback" value="350" step="any"></label>
