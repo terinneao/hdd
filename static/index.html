@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HDD Calculator — HDPE PE100 (TIS 982)</title>
+<title>HDD Calculator — HDPE PE100 / PE80 (TIS 982)</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,6 +14,16 @@
 
 <main>
   <div class="inputs">
+
+    <section class="card">
+      <h2>0 · Project (for printed sheet)</h2>
+      <div class="grid">
+        <label>Project / location
+          <input type="text" id="project_name" placeholder="e.g. Water main crossing, Rama II Rd."></label>
+        <label>Calculated by
+          <input type="text" id="calc_by" placeholder="name"></label>
+      </div>
+    </section>
 
     <section class="card">
       <h2>1 · Pipe Selection (TIS 982)</h2>
@@ -120,6 +130,8 @@
   Levy unconstrained buckling with ovality (f₀) and tension (f_R) factors.
   Results are estimates — final design must be verified by a qualified engineer.
 </footer>
+
+<div id="print-sheet"></div>
 
 <script src="app.js"></script>
 </body>
