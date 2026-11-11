@@ -163,6 +163,32 @@ td {
 td:last-child { text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
 tr:last-child td { border-bottom: none; }
 
+/* ---------- bore path profile ---------- */
+.bore-wrap {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+#bore-preview { margin-bottom: 12px; }
+.bore-svg { display: block; width: 100%; height: auto; }
+.bore-svg text { font-family: "Segoe UI", system-ui, sans-serif; }
+.bp-soil { fill: #3b2f22; opacity: .55; }
+.bp-ground { stroke: #a3825a; stroke-width: 2; }
+.bp-gw { stroke: #38bdf8; stroke-width: 1.2; stroke-dasharray: 6 4; opacity: .8; }
+.bp-gwt { fill: #38bdf8; }
+.bp-hole { fill: none; stroke: #8a7a62; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; opacity: .45; }
+.bp-pipe { fill: none; stroke: var(--accent); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+.bp-rig rect { fill: #f59e0b; }
+.bp-rig line { stroke: #f59e0b; stroke-width: 5; stroke-linecap: round; }
+.bp-pt { fill: var(--bg); stroke: var(--text); stroke-width: 2; }
+.bp-label { fill: var(--text); font-size: 15px; font-weight: 700; }
+.bp-force { fill: var(--accent); font-size: 13px; font-weight: 600; }
+.bp-small { fill: var(--muted); font-size: 13px; }
+.bp-arrow { fill: #f59e0b; font-size: 13px; font-weight: 600; }
+.bp-dim { stroke: var(--muted); stroke-width: 1; }
+.bp-note { fill: var(--muted); font-size: 11px; font-style: italic; }
+
 .rescard h2 { display: flex; justify-content: space-between; align-items: center; }
 
 footer {
@@ -213,6 +239,20 @@ footer {
     margin-bottom: 8pt;
   }
   .ps-verdict.ps-fail { background: #eee; }
+
+  .ps-bore { border: 1pt solid #000; margin-bottom: 4pt; }
+  .ps-bore .bore-svg { max-height: 52mm; }
+  .ps-bore .bp-soil { fill: #e8e2d8; opacity: 1; }
+  .ps-bore .bp-ground { stroke: #000; }
+  .ps-bore .bp-gw { stroke: #444; }
+  .ps-bore .bp-gwt, .ps-bore .bp-small, .ps-bore .bp-note, .ps-bore .bp-arrow { fill: #222; }
+  .ps-bore .bp-hole { stroke: #aaa; opacity: .6; }
+  .ps-bore .bp-pipe { stroke: #000; }
+  .ps-bore .bp-rig rect { fill: #555; }
+  .ps-bore .bp-rig line { stroke: #555; }
+  .ps-bore .bp-pt { fill: #fff; stroke: #000; }
+  .ps-bore .bp-label, .ps-bore .bp-force { fill: #000; }
+  .ps-bore .bp-dim { stroke: #444; }
 
   .ps-cols {
     display: grid;

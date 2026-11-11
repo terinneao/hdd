@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hdd",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["app.py"],
+      "port": 8000
+    }
+  ]
+}
